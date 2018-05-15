@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>链社区-基于星云链的微论坛</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.3.7/lib/theme-chalk/index.css">
+    <link rel="stylesheet" href="static/css/style.css?_=1.0.1">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.2.6/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-router@3.0.1/dist/vue-router.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/element-ui@2.3.7/lib/index.js"></script>
+</head>
+
+<body>
+    <div id="app" v-show="visible" style="display: none;">
+        <nav id="nav">
+            <div class="logo-menu">
+                <router-link class="logo" :to="{path:'/'}">链社区</router-link>
+                <i class="el-icon-more-outline menu" @click="showMenu"></i>
+            </div>
+            <el-menu :default-active="activeIndex" id="left-menu" class="el-menu left" mode="horizontal">
+                <el-menu-item index="home">
+                    <router-link :to="{path:'/'}">首页</router-link>
+                </el-menu-item>
+                <el-menu-item index="my">
+                    <router-link :to="{path:'/category'}">栏目</router-link>
+                </el-menu-item>
+                <el-submenu index="my">
+                    <template slot="title">我的</template>
+                    <el-menu-item>
+                        <router-link :to="{path:'/user/topic'}">创建的主题</router-link>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <router-link :to="{path:'/my/reply'}">发表的回复</router-link>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <router-link :to="{path:'/fav/topic/'}">收藏的主题</router-link>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <router-link :to="{path:'/fav/category'}">收藏的栏目</router-link>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <router-link :to="{path:'/my/fllow'}">关注的作者</router-link>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <router-link :to="{path:'/donate/received'}">收到的打赏</router-link>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <router-link :to="{path:'/donate'}">发出的打赏</router-link>
+                    </el-menu-item>
+                </el-submenu>
+                <!--<el-menu-item index="about">
+                    <router-link :to="{path:'/about'}">关于</router-link>
+                </el-menu-item>-->
+                <el-submenu index="chainnet">
+                    <template slot="title">{{chainStr}}</template>
+                    <el-menu-item index="mainnet" @click="changChain('mainnet')">主网</el-menu-item>
+                    <el-menu-item index="testnet" @click="changChain('testnet')">测试网</el-menu-item>
+                </el-submenu>
+            </el-menu>
+            <el-menu :default-active="activeIndex" id="right-menu" class="el-menu right" mode="horizontal">
+                <el-menu-item index="add">
+                    <router-link :to="{path:'/topic/add'}">
+                        <el-button type="primary" size="small" icon="el-icon-plus" circle></el-button>
+                    </router-link>
+                </el-menu-item>
+                <el-menu-item index="nas-num">{{balance}} NAS</el-menu-item>
+                <el-submenu index="account">
+                    <template slot="title">账号</template>
+                    <el-menu-item index="setting">
+                        <router-link :to="{path:'/user/setting'}">设置</router-link>
+                    </el-menu-item>
+                </el-submenu>
+            </el-menu>
+        </nav>
+        <div class="container" id="container">
+            <div style="text-align:center;padding-left:20px;">
+                <el-alert type="error" class="noExtension" id="noExtension"  v-if="noExtension">
+                    注意: 请安装
+                    <a class="blue-color" target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">浏览器插件钱包</a> 后使用全部功能
+                </el-alert>
+                <el-alert style="font-size:14px;text-align:left;" type="warning">星云链NAS推出第一季星云激励计划，只要懂Javascript和一杯下午茶的时间，您就可以开发属于您的第一个DApp。每提交一个有效DApp即可获得100 NAS（目前1NAS=￥50），更有周大奖 10000 NAS（1名），5000 NAS（1名），3000 NAS（1名），300 NAS（20名） 等你来拿。
+                <a target="_blank" href="https://incentive.nebulas.io/cn/signup.html?invite=YOr2Y">立即注册学习</a>    </el-alert>
+            </div>
+            <el-row>
+                <el-col :span="18" :xs="24" id="content-left" v-loading="false" element-loading-text="正在查询交易结果，请稍等！">
+                    <div class="content">
+                        <router-view></router-view>
+                    </div>
+                </el-col>
+                <el-col :span="6" :xs="24" id="content-right">
+                    <div class="right-section userbox box">
+                        <router-link :to="{path:'/my/'}">
+                            <div class="avatar">
+                                <img :src="app.user.avatar|buildAvatar" alt="">
+                            </div>
+                            <p class="nickname">{{app.user.nickName?app.user.nickName:"未注册"}}</p>
+                        </router-link>
+                        <el-row class="data">
+                            <el-col :span="8">
+                                <router-link :to="{path:'/user/topic'}">
+                                    <p class="num">{{app.user.topicNums}}</p>
+                                    <p class="text">主题数</p>
+                                </router-link>
+                            </el-col>
+                            <el-col :span="8">
+                                <router-link :to="{path:'/my/reply'}">
+                                    <p class="num">{{app.user.replyNums}}</p>
+                                    <p class="text">回复数</p>
+                                </router-link>
+                            </el-col>
+                            <el-col :span="8">
+                                <router-link :to="{path:'/my/fllow'}">
+                                    <p class="num">{{app.user.fllowNums}}</p>
+                                    <p class="text">关注</p>
+                                </router-link>
+                            </el-col>
+                        </el-row>
+                        <router-link style="margin-top:10px;" :to="{path:'/topic/add'}" class="el-button el-button--text">
+                            <span>添加新主题</span>
+                        </router-link>
+                        <el-row class="data2">
+                            <el-col :span="6">
+                                <router-link :to="{path:'/fav/category'}">
+                                    <p class="text">栏目收藏</p>
+                                    <p class="num">{{app.user.favCategoryNums}}</p>
+                                </router-link>
+                            </el-col>
+                            <el-col :span="6">
+                                <router-link :to="{path:'/fav/topic'}">
+                                    <p class="text">主题收藏</p>
+                                    <p class="num">{{app.user.favTopicNums}}</p>
+                                </router-link>
+                            </el-col>
+                            <el-col :span="6">
+                                <router-link :to="{path:'/my/fllow'}">
+                                    <p class="text">关注</p>
+                                    <p class="num">{{app.user.fllowNums}}</p>
+                                </router-link>
+                            </el-col>
+                            <el-col :span="6">
+                                <router-link :to="{path:'/'}">
+                                    <p class="text">粉丝</p>
+                                    <p class="num">{{app.user.fansNums}}</p>
+                                </router-link>
+                            </el-col>
+                        </el-row>
+                    </div>
+
+                    <div class="box" v-if="ads.length">
+                        <div class="header">广告</div>
+                        <div class="content">
+                            <a target="_blank" :href="item.url" class="ads-item" v-for="item,index in ads" :key="index">
+                                <img :src="item.img" :alt="item.title" :title="item.title">
+                            </a>
+                        </div>
+                    </div>
+                    <div class="box" v-if="hotTopics.topics.length">
+                        <div class="header">最新热议主题</div>
+                        <div class="content">
+                            <el-row class="topic-style-1" v-for="item in hotTopics.topics" :key="item.hash">
+                                <router-link :span="24" :to="{path:'/topic/'+item.hash}" class="title">{{item.title}}</router-link>
+                            </el-row>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="header">最热栏目</div>
+                        <div class="content">
+                            <router-link :to="{path:'/c/'+category.slug}" class="cate-name" v-for="category in app.hotCategory.slice(0,7)" :key="category.slug">{{category.name}}</router-link>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="header">最新栏目</div>
+                        <div class="content">
+                            <router-link :to="{path:'/c/'+category.slug}" class="cate-name" v-for="category in app.categoryList.category.slice(0,7)"
+                                :key="category.slug">{{category.name}}</router-link>
+                        </div>
+                    </div>
+                    <div class="box">
+                        <div class="header">论坛运行状况</div>
+                        <div class="content bbs-info">
+                            <table>
+                                <tr>
+                                    <th>用户数</th>
+                                    <td>{{app.bbsStatus.userNums}}</td>
+                                </tr>
+                                <tr>
+                                    <th>主题</th>
+                                    <td>{{app.bbsStatus.topicNums}}</td>
+                                </tr>
+                                <tr>
+                                    <th>回复</th>
+                                    <td>{{app.bbsStatus.replyNums}}</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </el-col>
+            </el-row>
+            <div class="footer">
+                <span>使用
+                    <a href="https://nebulas.io/" target="_blank">星云链</a> 驱动</span>&nbsp;|&nbsp;
+                <span>
+                    <a href="https://weibo.com/mzhangbo" target="_blank">联系作者</a>
+                </span>&nbsp;|&nbsp;
+                <span>
+                    <a href="https://incentive.nebulas.io/cn/signup.html?invite=YOr2Y" target="_blank">提交DAPP获得 100NAS 币</a>
+                </span>
+            </div>
+        </div>
+    </div>
+    <script type="text/x-template" id="my-donate-tpl">
+        <div class="box" id="my-donate" v-loading="donateListLoading">
+            <div class="header header-black">
+                <div class="left">
+                    我发出的打赏
+                </div>
+                <div class="right">
+                    <span class="blue-color">共发出 {{donateList.donateNas|fromBasicNas}} NAS</span>
+                </div>
+            </div>
+            <div class="content">
+                <table class="table donate-info">
+                    <tr>
+                        <th style="width: 55%;">打赏对象</th>
+                        <th style="width: 30%;">打赏金额</th>
+                        <th style="width: 15%;">打赏时间</th>
+                    </tr>
+                    <tr v-for="item in donateList.donate" :key="item.txhash">
+                        <td class="content">
+                            <div v-if="item.source == 'topic'">
+                                <router-link class="hl" :to="{name:'myTopic',params:{hash:item.to}}">{{item.toUserInfo.nickName}}</router-link> 发布的主题
+                                <router-link class="hl" :to="{name:'topic',params:{hash:item.oriHash}}">{{item.topic.title}}</router-link>
+                            </div>
+                            <div v-else-if="item.source == 'reply'">
+                                <router-link class="hl" :to="{name:'myTopic',params:{hash:item.to}}">{{item.toUserInfo.nickName}}</router-link> 发表的回复
+                                <div v-if="item.reply">
+                                    {{item.reply.content}}
+                                </div>
+                            </div>
+                            <div v-else>
+                                <router-link>{{item.toUserInfo.nickName}}</router-link>
+                            </div>
+                        </td>
+                        <td class="title">{{item.oriValue|fromBasicNas}} NAS</td>
+                        <td class="date">{{item.created|dateFormat}}</td>
+                    </tr>
+                </table>
+                <div style="text-align:center;margin:20px auto;">
+                    <el-button round size="medium" :disabled="noMoreData" :loading="loadingMoreStatus" @click="loadingMore">{{loadingMoreText}}</el-button>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="my-received-donate-tpl">
+        <div class="box" id="my-received-donate" v-loading="donateListLoading">
+            <div class="header header-black">
+                <div class="left">
+                    我收到的打赏
+                </div>
+                <div class="right">
+                    <span class="blue-color">共收到 {{donateList.getDonateNas|fromBasicNas}} NAS</span>
+                </div>
+            </div>
+            <div class="content">
+                <table class="table donate-info">
+                    <tr>
+                        <th style="width: 55%;">打赏对象</th>
+                        <th style="width: 30%;">打赏金额</th>
+                        <th style="width: 15%;">打赏时间</th>
+                    </tr>
+                    <tr v-for="item in donateList.donate" :key="item.txhash">
+                        <td class="content">
+                            <div v-if="item.source == 'topic'">
+                                <router-link class="hl" :to="{name:'myTopic',params:{hash:item.from}}">{{item.fromUserInfo && item.fromUserInfo.nickName ||item.from}}</router-link> 打赏了主题
+                                <router-link class="hl" :to="{name:'topic',params:{hash:item.oriHash}}">{{item.topic.title}}</router-link>
+                            </div>
+                            <div v-else-if="item.source == 'reply'">
+                                <router-link class="hl" :to="{name:'myTopic',params:{hash:item.from}}">{{item.fromUserInfo && item.fromUserInfo.nickName}}</router-link> 打赏了回复
+                                <div v-if="item.reply">
+                                    {{item.reply.content}}
+                                </div>
+                            </div>
+                            <div v-else>
+                                <router-link class="hl" :to="{name:'myTopic',params:{hash:item.from}}">{{item.fromUserInfo && item.fromUserInfo.nickName}}</router-link>
+                            </div>
+                        </td>
+                        <td class="title">{{item.transferValue|fromBasicNas}} NAS</td>
+                        <td class="date">{{item.created|dateFormat}}</td>
+                    </tr>
+                </table>
+                <div style="text-align:center;margin:20px auto;">
+                    <el-button round size="medium" :disabled="noMoreData" :loading="loadingMoreStatus" @click="loadingMore">{{loadingMoreText}}</el-button>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="my-reply-tpl">
+        <div class="box" id="my-reply" v-loading="replyListLoading">
+            <div class="header header-black">我的回复</div>
+            <table class="table">
+                <tr>
+                    <th style="width: 30%;">主题</th>
+                    <th style="width: 55%;">回复内容</th>
+                    <th style="width: 15%;">回复时间</th>
+                </tr>
+                <tr v-for="item in replyList.reply" :key="item.hash">
+                    <td class="title">
+                        <router-link :to="{name:'topic',params:{hash:item.topic.hash}}">{{item.topic.title}}</router-link>
+                    </td>
+                    <td class="content">{{item.content}}</td>
+                    <td class="date">{{item.created|dateFormat}}</td>
+                </tr>
+            </table>
+            <div style="text-align:center;margin:20px auto;">
+                <el-button round size="medium" :disabled="noMoreData" :loading="replyListMoreLoading" @click="loadingMore">{{loadingMoreText}}</el-button>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="topic-tpl">
+        <div id="topic" v-loading="loading" element-loading-text="拼命加载中">
+            <div class="topic-detail box" v-if="topic">
+                <el-breadcrumb separator-class="el-icon-arrow-right" class="header">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>{{topic.categoryDetail.name}}</el-breadcrumb-item>
+                </el-breadcrumb>
+                <div class="content">
+                    <el-row class="topic-item">
+                        <el-col :span="2" :xs="24" class="avatar">
+                            <el-popover placement="right-start" trigger="hover">
+                                <div class="user-popover">
+                                    <img class="avatar" :src="topic.user.avatar|buildAvatar">
+                                    <p class="name">{{topic.user.nickName}}</p>
+                                    <p class="topic-nums" v-if="topic.user.topicNums">主题数 {{topic.user.topicNums}}</p>
+                                    <el-button class="fllow" @click="$eventHub.fllowUser(topic.user)" size="mini" round>立即关注</el-button>
+                                </div>
+                                <img slot="reference" :src="topic.user.avatar|buildAvatar">
+                            </el-popover>
+                        </el-col>
+                        <el-col :span="22" :xs="24" class="topic">
+                            <p class="title">
+                                {{topic.title}}
+                            </p>
+                            <div class="topic-info">
+                                <router-link class="category" :to="{name:'category',params:{slug:topic.category}}">{{topic.categoryDetail.name}}</router-link>&nbsp;•&nbsp;
+                                <strong>
+                                    <router-link :to="{name:'myTopic',params:{hash:topic.author}}">{{topic.user.nickName}}</router-link>
+                                </strong> &nbsp;•&nbsp; {{topic.created|dateFormat}}
+                                <span v-if="topic.lastUser"> &nbsp;•&nbsp; 最后回复来自
+                                    <strong>
+                                        <a href="">{{topic.lastUserInfo.nickName}}</a>
+                                    </strong>
+                                </span>
+                            </div>
+                            <span class="badge" title="回复数">{{topic.replyNums}}</span>
+                        </el-col>
+                    </el-row>
+                    <div class="topic-content">
+                        <div v-html="contentFormat(topic.content)" class="detail">
+                        </div>
+                        <div class="text-center donate" v-if="topic.openDonate">
+                            <el-button type="warning" circle @click="donateTopic">赏</el-button>
+                            <p class="donate-info" v-if="topic.donateNums">已有
+                                <span class="nums">{{topic.donateNums}}</span> 人打赏
+                                <span v-if="topic.donateNas">
+                                    <span class="nas">{{topic.donateNas|fromBasicNas}}</span> NAS
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="footer" v-if="topic.additionalNums">
+                    <div class="additional" v-for="add,index in topic.additional" :key="add.created">
+                        <p class="info">第 {{index+1}} 条附言 · {{add.created|dateFormat}} </p>
+                        <div v-html="contentFormat(add.content)">
+                        </div>
+                    </div>
+                </div>
+                <el-row class="footer action">
+                    <el-col :span="12" :xs="12">
+                        <a @click="favTopic">收藏</a>
+                        <span v-if="app.address == topic.author">&nbsp;•&nbsp;
+                            <a @click="addContent">补充内容</a>
+                        </span>
+                    </el-col>
+                    <el-col :span="12" :xs="12" style="text-align:right">
+                        <span v-if="topic.favNums">{{topic.favNums}} 人收藏</span>
+                    </el-col>
+                </el-row>
+            </div>
+            <div class="replylist box">
+                <div class="header">回复列表
+                    <span>({{replyList.total}})</span>
+                </div>
+                <div class="content">
+                    <el-row class="reply-item" v-for="reply in replyList.reply">
+                        <el-col :span="2" :xs="4" class="avatar">
+                            <el-popover placement="right-start" trigger="hover">
+                                <div class="user-popover">
+                                    <img class="avatar" :src="reply.user.avatar|buildAvatar">
+                                    <p class="name">{{reply.user.nickName}}</p>
+                                    <p class="reply-nums" v-if="reply.user.topicNums">主题数 {{reply.user.topicNums}}</p>
+                                    <el-button class="fllow" @click="$eventHub.fllowUser(reply.user)" size="mini" round>立即关注</el-button>
+                                </div>
+                                <img slot="reference" :src="reply.user && reply.user.avatar|buildAvatar">
+                            </el-popover>
+                        </el-col>
+                        <el-col :span="22" :xs="18" class="info">
+                            <div class="user">
+                                <a class="nickname" href="">{{reply.user && reply.user.nickName||reply.author}}</a>
+                                <span class="created">{{reply.created|dateFormat}}</span>
+                                <span class="no">{{reply.replyIndex}}</span>
+                            </div>
+                            <div class="reply-content" v-html="contentFormat(reply.content)"></div>
+                            <span class="action donate" @click="donateReply(reply)">赏</span>
+                        </el-col>
+                    </el-row>
+                    <div style="text-align:center;margin:20px auto;">
+                        <el-button round size="medium" :loading="replyListLoading" @click="loadingMore">{{loadingMoreText}}</el-button>
+                    </div>
+                </div>
+            </div>
+            <div class="box add-reply">
+                <div class="header">添加回复</div>
+                <div class="content">
+                    <el-form status-icon>
+                        <el-form-item>
+                            <el-input type="textarea" v-model="reply.content" :autosize="{ minRows: 3}"></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="submitReply">立即回复</el-button>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="user-setting-tpl">
+        <div id="user-setting" class="box" v-loading="loading" element-loading-text="拼命加载中">
+            <div class="header" style="color:#333;font-size:15px;font-weight:bold;">用户设置</div>
+            <div class="content">
+                <el-alert v-if="!app.address" title="请从插件钱包中选择你的账户" type="error" style="margin-bottom:15px;">
+                </el-alert>
+                <el-form :model="userInfo" status-icon :rules="userInfoRules" ref="userInfo" label-position="right" label-width="100px">
+                    <el-form-item label="钱包地址">
+                        <el-input :value="app.address" disabled></el-input>
+                    </el-form-item>
+                    <el-form-item label="用户ID" v-if="userInfo.id>=0">
+                        <el-input :value="userInfo.id" disabled></el-input>
+                    </el-form-item>
+                    <!-- "avatar", "nickName", "weibo", "twitter", "facebook", "bio", "website", "company", "job" -->
+                    <el-form-item label="头像URL" prop="avatar">
+                        <el-input v-model="userInfo.avatar"></el-input>
+                    </el-form-item>
+                    <el-form-item label="昵称" prop="nickName">
+                        <el-input v-model="userInfo.nickName"></el-input>
+                    </el-form-item>
+                    <el-form-item label="个性签名" prop="bio">
+                        <el-input v-model="userInfo.bio" :autosize="{ minRows: 2}"></el-input>
+                    </el-form-item>
+                    <el-form-item label="个人主页" prop="website">
+                        <el-input v-model="userInfo.website"></el-input>
+                    </el-form-item>
+                    <el-form-item label="微博" prop="weibo">
+                        <el-input v-model="userInfo.weibo"></el-input>
+                    </el-form-item>
+                    <el-form-item label="twitter" prop="twitter">
+                        <el-input v-model="userInfo.twitter"></el-input>
+                    </el-form-item>
+                    <el-form-item label="facebook" prop="facebook">
+                        <el-input v-model="userInfo.facebook"></el-input>
+                    </el-form-item>
+
+                    <el-form-item label="公司" prop="company">
+                        <el-input v-model="userInfo.company"></el-input>
+                    </el-form-item>
+                    <el-form-item label="工作" prop="job">
+                        <el-input v-model="userInfo.job"></el-input>
+                    </el-form-item>
+
+                    <el-form-item>
+                        <el-button type="primary" @click="submitUser('userInfo')">保存用户信息</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="add-topic-tpl">
+        <div id="add-topi" class="box">
+
+            <div class="header" style="color:#333;font-size:15px;font-weight:bold;">{{action=='addContent'?'补充帖子内容':'添加新主题'}}</div>
+            <div class="content">
+                <el-alert style="font-size:14px;" type="warning">请输入有意义的标题，如果标题能够表达完整内容，则正文可以为空。正文内容支持 <a href="http://wowubuntu.com/markdown/" target="_blank">Markdown</a></el-alert>
+                <el-form status-icon label-position="top">
+                    <el-form-item label="标题">
+                        <el-input v-model="topic.title" :disabled="action=='addContent'"></el-input>
+                    </el-form-item>
+                    <el-form-item label="栏目" v-show="action!='addContent'">
+                        <el-select v-model="topic.category" filterable placeholder="请选择">
+                            <el-option v-for="item in category" :key="item.slug" :label="item.name" :value="item.slug">
+                            </el-option>
+                        </el-select>
+                    </el-form-item>
+                    <el-form-item label="内容">
+                        <el-input type="textarea" v-model="topic.content" :autosize="{ minRows: 9}"></el-input>
+                    </el-form-item>
+                    <el-switch v-show="action!='addContent'" style="margin-bottom:15px;" v-model="topic.openDonate" active-text="开启打赏"></el-switch>
+                    <!--<el-form-item>
+                        <div v-html="contentFormat(topic.content)"></div>
+                    </el-form-item>-->
+                    <el-form-item>
+                        <el-button type="primary" @click="submitForm('topicForm')">{{action=='addContent'?'立即补充':'立即创建'}}</el-button>
+                    </el-form-item>
+                </el-form>
+            </div>
+        </div>
+    </script>
+    <script type="text/x-template" id="category-list-tpl">
+        <div id="category-list" class="category-box">
+            <el-row>
+                <el-col class="item" :span="8" :xs="12" v-for="item in app.categoryList.category" :key="item.hash">
+                    <div class="box">
+                        <router-link class="name" :to="{path:'/c/'+item.slug}">{{item.name}}</router-link>
+                        <p class="nums">主题总数&nbsp;{{item.topicNums}}</p>
+                        <p class="action">
+                            <el-button round size="mini" @click="addFavCategory(item)">立即关注</el-button>
+                        </p>
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+    </script>
+    <script type="text/x-template" id="fav-category-list-tpl">
+        <div id="fav-category-list" class="category-box" v-loading="loadingStatus" element-loading-text="努力加载中……">
+            <el-row>
+                <el-col class="item" :span="8" :xs="12" v-for="item in favCategory.category" :key="item.hash">
+                    <div class="box">
+                        <router-link class="name" :to="{path:'/c/'+item.slug}">{{item.name}}</router-link>
+                        <p class="nums">主题总数&nbsp;{{item.topicNums}}</p>
+                        <p class="action">
+                            <el-button round size="mini" @click="delFavCategory(item)">取消关注</el-button>
+                        </p>
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+    </script>
+    <script type="text/x-template" id="my-fllow-tpl">
+        <div id="my-fllow" class="category-box fllow-box" v-loading="loadingStatus" element-loading-text="努力加载中……">
+            <el-row>
+                <el-col class="item" :span="8" :xs="24" v-for="item in myFllow.fllow" :key="item.address">
+                    <div class="box">
+                        <div class="avatar">
+                            <img :src="item.user.avatar|buildAvatar">
+                        </div>
+                        <router-link class="name" :to="{name:'myTopic',params:{hash:item.address}}">{{item.user.nickName}}</router-link>
+                        <p class="nums">主题总数&nbsp;{{item.user.topicNums}}</p>
+                        <p class="action">
+                            <el-button round size="mini" @click="unfllow(item)">取消关注</el-button>
+                        </p>
+                    </div>
+                </el-col>
+            </el-row>
+        </div>
+    </script>
+    <script type="text/x-template" id="home-tpl">
+        <div id="home" class="box" v-loading="loading" element-loading-text="努力加载中">
+            <div class="topic-list">
+                <ul class="category-list" v-if="page == 'home'||page == 'category'">
+                    <li>
+                        <router-link :class="{'active':!slug}" :to="{path:'/'}">全部</router-link>
+                    </li>
+                    <li v-for="category in app.categoryList.category.slice(0,10)" :key="category.slug">
+                        <router-link :class="{'active':slug==category.slug}" :to="{path:'/c/'+category.slug}">{{category.name}}</router-link>
+                    </li>
+                </ul>
+                <div class="header header-black" v-if="page=='myTopic'">{{userNickName}}发布的主题
+                    <span v-if="userHash">({{user.topicNums}})</span>
+                </div>
+                <div class="header header-black" v-if="page=='favTopic'">我收藏的主题</div>
+                <div class="item-list">
+                    <el-row class="topic-item" v-for="item in topicList.topic" :key="item.hash">
+                        <el-col :span="2" :xs="4" class="avatar">
+                            <img :src="item.user.avatar|buildAvatar" alt="">
+                        </el-col>
+                        <el-col :span="22" :xs="18" class="topic">
+                            <p class="title">
+                                <router-link :to="{name:'topic',params:{hash:item.hash}}">{{item.title}}</router-link>
+                            </p>
+                            <div class="topic-info">
+                                <router-link class="category" :to="'/c/'+item.category">{{item.categoryDetail.name}}</router-link>&nbsp;•&nbsp;
+                                <strong>
+                                    <router-link :to="{name:'myTopic',params:{hash:item.author}}">{{item.user.nickName}}</router-link>
+                                </strong> &nbsp;•&nbsp; {{item.created|dateFormat}}
+                                <span v-if="item.lastUserInfo"> &nbsp;•&nbsp;最后回复来自
+                                    <strong>
+                                        <router-link :to="{name:'myTopic',params:{hash:item.lastUser}}">{{item.lastUserInfo.nickName}}</router-link>
+                                    </strong>
+                                </span>
+                            </div>
+                            <span class="badge">{{item.replyNums}}</span>
+                        </el-col>
+                    </el-row>
+                </div>
+                <div style="text-align:center;margin:20px auto;">
+                    <el-button round size="medium" :disabled="loadingMoreDisabled" :loading="loadingMoreStatus" @click="loadingMore">{{loadingMoreText}}</el-button>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <script src="dist/nebulas.js"></script>
+    <script src="dist/nebPay.js"></script>
+    <script src="static/js/markdown.min.js"></script>
+    <script src="static/js/index.js?_=201805151034"></script>
+
+</body>
+
+</html>
