@@ -799,6 +799,11 @@ var TopicComponent = {
             })
         }
     },
+    watch: {
+        "hash": function () {
+            location.reload()
+        }
+    },
     created: function () {
         this.fetchTopic()
         this.fetchReplyList()
@@ -864,7 +869,7 @@ var UserSettingComponent = {
             return !app.userLoad
         }
     },
-    beforeDestroy:function() {
+    beforeDestroy: function () {
         this.$eventHub.$off('userUpdate');
     },
     data: function () {
