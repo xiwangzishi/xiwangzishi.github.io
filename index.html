@@ -51,16 +51,21 @@
                         <router-link :to="{path:'/donate'}">发出的打赏</router-link>
                     </el-menu-item>
                 </el-submenu>
-                <!--<el-menu-item index="about">
+                <el-menu-item index="about">
                     <router-link :to="{path:'/about'}">关于</router-link>
-                </el-menu-item>-->
-                <el-submenu index="chainnet">
+                </el-menu-item>
+                <el-submenu index="chainnet" v-show="false">
                     <template slot="title">{{chainStr}}</template>
                     <el-menu-item index="mainnet" @click="changChain('mainnet')">主网</el-menu-item>
                     <el-menu-item index="testnet" @click="changChain('testnet')">测试网</el-menu-item>
                 </el-submenu>
             </el-menu>
             <el-menu :default-active="activeIndex" id="right-menu" class="el-menu right" mode="horizontal">
+                <el-menu-item index="register">
+                    <router-link :to="{path:'/user/setting'}">
+                    注册
+                    </router-link>
+                </el-menu-item>
                 <el-menu-item index="add">
                     <router-link :to="{path:'/topic/add'}">
                         <el-button type="primary" size="small" icon="el-icon-plus" circle></el-button>
@@ -79,7 +84,7 @@
             <div style="text-align:center;padding-left:20px;">
                 <el-alert type="error" class="noExtension" id="noExtension"  v-if="noExtension">
                     注意: 请安装
-                    <a class="blue-color" target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">浏览器插件钱包</a> 后使用全部功能
+                    <a class="blue-color" target="_blank" href="https://github.com/ChengOrangeJu/WebExtensionWallet">浏览器插件钱包</a> 后使用全部功能,<a class="blue-color" href="https://bbs.forfunapp.com/#/topic/690b1f635d1b89719e718149328eae5ea6204499d239c3e71fc1051b0bec4a39">安装教程</a>
                 </el-alert>
                 <el-alert style="font-size:14px;text-align:left;" type="warning">星云链NAS推出第一季星云激励计划，只要懂Javascript和一杯下午茶的时间，您就可以开发属于您的第一个DApp。每提交一个有效DApp即可获得100 NAS（目前1NAS=￥50），更有周大奖 10000 NAS（1名），5000 NAS（1名），3000 NAS（1名），300 NAS（20名） 等你来拿。
                 <a target="_blank" href="https://incentive.nebulas.io/cn/signup.html?invite=YOr2Y">立即注册学习</a>    </el-alert>
@@ -92,7 +97,7 @@
                 </el-col>
                 <el-col :span="6" :xs="24" id="content-right">
                     <div class="right-section userbox box">
-                        <router-link :to="{path:'/my/'}">
+                        <router-link :to="{path:'/user/setting'}">
                             <div class="avatar">
                                 <img :src="app.user.avatar|buildAvatar" alt="">
                             </div>
@@ -437,13 +442,47 @@
             </div>
         </div>
     </script>
+    <script type="text/x-template" id="about-tpl">
+        <div id="about" class="box">
+            <div class="header" style="color:#333;font-size:17px;font-weight:bold;">链社区 - 致力服务于广大区块链开发者的交流平台</div>
+            <div class="content">
+                <div>
+                    <p>欢迎来到链社区，这是一个致力服务于广大区块链开发者的交流平台。整个论坛是一个基于星云链开发的DAPP，论坛所有数据全部储存于链社区的智能合约当中，数据永远保存在区块链上，永不丢失。<p>
+                    <p>可以通过 <a class="blue-color" target="_blank" href="https://explorer.nebulas.io/#/tx/04222aa816c36a7895efd59256f4f2844fae253064ebc40c155266e3d6cc5220">这里</a> 查看我的合约源码</p>
+                    <p>可以通过 <a class="blue-color" target="_blank" href="https://github.com/xiwangzishi/xiwangzishi.github.io">这里</a> 获取所有源码</p>
+                    <p>大家如果在开发 DAPP 的过程中遇见任何问题都可以来这里发帖交流。论坛也有很多其他栏目，所以你也可以来这里分享你的故事！</p>
+                    <p>论坛有不好的地方也欢迎反馈给我们！可以通过以下方式联系链社区</p>
+                    <p><img width="300" src="https://wx2.sinaimg.cn/mw690/5065f17agy1frdo54i5i6j20u01biwmr.jpg" /></p>
+                    <p>我的微信：zankbo</p>
+                    <p>我的微博：<a class="blue-color" href="https://weibo.com/mzhangbo">@希望之石</a></p>
+                </div>
+            </div>
+        </div>
+    </script>
+                
     <script type="text/x-template" id="user-setting-tpl">
-        <div id="user-setting" class="box" v-loading="loading" element-loading-text="拼命加载中">
+        <div id="user-setting" class="box" v-if="!app.address">
+            <div class="header" style="color:#333;font-size:15px;font-weight:bold;">用户设置</div>
+            <div class="content" style="color:#F56C6C">
+                <span v-if="noExtension">未能获取到账号地址，可能是还没有安装&nbsp;&nbsp;<a class="blue-color" href="https://github.com/ChengOrangeJu/WebExtensionWallet">浏览器插件钱包</a>，<a class="blue-color" href="https://bbs.forfunapp.com/#/topic/690b1f635d1b89719e718149328eae5ea6204499d239c3e71fc1051b0bec4a39">安装教程</a></span>
+                <div v-else>
+                    未能获取到账号地址，可能是因为你的钱包还未导入账号文件，请导入钱包后使用该功能
+                    <p>导入后的钱包插件状态为</p>
+                    <img src="https://wx1.sinaimg.cn/mw690/5065f17agy1frdn23jjtaj20mi0ekdgy.jpg" />
+                    <br/><br/><br/>
+                    <p><strong>选择钱包后，点击解锁导入钱包信息</strong></p>
+                    <img src="https://wx1.sinaimg.cn/mw690/5065f17agy1frdn5uhu6cj20mk0hq0u4.jpg" />
+                </div>
+            </div>
+        </div>
+        <div id="user-setting" v-else class="box" v-loading="loading" element-loading-text="拼命加载中">
             <div class="header" style="color:#333;font-size:15px;font-weight:bold;">用户设置</div>
             <div class="content">
-                <el-alert v-if="!app.address" title="请从插件钱包中选择你的账户" type="error" style="margin-bottom:15px;">
+                <el-alert type="success" style="margin-bottom:15px;font-size:13px;">
+                    补充完昵称后点击保存即可快速注册，<a class="blue-color" href="https://bbs.forfunapp.com/#/topic/c4b68feed5f1d54f52b90a5b82d48c4baa5f3607b1b7fe9afe2909928f9f63ea">没有 NAS 注册不了点我</a>
                 </el-alert>
                 <el-form :model="userInfo" status-icon :rules="userInfoRules" ref="userInfo" label-position="right" label-width="100px">
+
                     <el-form-item label="钱包地址">
                         <el-input :value="app.address" disabled></el-input>
                     </el-form-item>

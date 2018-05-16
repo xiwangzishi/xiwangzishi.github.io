@@ -829,7 +829,9 @@ var TopicComponent = {
         }
     }
 }
-
+var AboutComponent = {
+    template: '#about-tpl',
+}
 var UserSettingComponent = {
     template: '#user-setting-tpl',
     methods: {
@@ -959,6 +961,11 @@ var routes = [{
         path: '/user/setting',
         component: UserSettingComponent,
         name: "userSetting"
+    },
+    {
+        path: '/about',
+        component: AboutComponent,
+        name: "about"
     },
 ]
 
@@ -1379,13 +1386,6 @@ nasApi.getNebState().then(function (state) {
 })
 
 function getWallectInfo() {
-
-    window.postMessage({
-        "target": "contentscript",
-        "data": {},
-        "method": "getAccount",
-    }, "*");
-
     window.addEventListener('message', function (e) {
         if (e.data && e.data.data) {
             mylog("e.data.data:", e.data.data)
@@ -1395,4 +1395,10 @@ function getWallectInfo() {
             }
         }
     })
+
+    window.postMessage({
+        "target": "contentscript",
+        "data": {},
+        "method": "getAccount",
+    }, "*");
 }
