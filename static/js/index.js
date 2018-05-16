@@ -800,7 +800,7 @@ var TopicComponent = {
         }
     },
     watch: {
-        "hash": function () {
+        "$route.params": function () {
             location.reload()
         }
     },
