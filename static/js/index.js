@@ -751,6 +751,7 @@ var TopicComponent = {
                         total: 0,
                         reply: []
                     }
+                    // _this.replyOffset = 0
                     _this.fetchReplyList()
                 },
             }
