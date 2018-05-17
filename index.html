@@ -51,6 +51,22 @@
                         <router-link :to="{path:'/donate'}">发出的打赏</router-link>
                     </el-menu-item>
                 </el-submenu>
+                 <el-submenu index="tool">
+                    <template slot="title">常用网址</template>
+                    <el-menu-item>
+                        <a href="https://bbs.forfunapp.com/#/topic/c4b68feed5f1d54f52b90a5b82d48c4baa5f3607b1b7fe9afe2909928f9f63ea">没币怎么办</a>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <a href="https://bbs.forfunapp.com/#/topic/f4cf973721a4265cf4d0f231c583420fce60950f7f02b3fd50e7b008bac0243f">怎么获取钱包账号</a>
+                    </el-menu-item>
+                    <el-menu-item>
+                        <a target="_blank" href="https://nebulasio.github.io/neb.js/index.html">Neb.js 文档</a>
+                    </el-menu-item>
+                    <el-menu-item><a target="_blank" href="https://github.com/nebulasio/wiki">官方Wiki</a></el-menu-item>
+                    <el-menu-item><a target="_blank" href="https://blog.nebulas.io/2018/05/09/how-to-use-nebpay-in-your-dapp/">NebPay教程</a></el-menu-item>
+                    <el-menu-item><a target="_blank" href="https://blog.nebulas.io/2018/05/04/how-to-build-a-dapp-on-nebulas-part-1/">手把手教你星云DApp开发</a>
+                    </el-menu-item>
+                </el-submenu>
                 <el-menu-item index="about">
                     <router-link :to="{path:'/about'}">关于</router-link>
                 </el-menu-item>
@@ -207,9 +223,9 @@
             <div class="footer">
                 <span>使用
                     <a href="https://nebulas.io/" target="_blank">星云链</a> 驱动</span>&nbsp;|&nbsp;
-                <span>
+                <!-- <span>
                     <a href="https://weibo.com/mzhangbo" target="_blank">联系作者</a>
-                </span>&nbsp;|&nbsp;
+                </span>&nbsp;|&nbsp; -->
                 <span>
                     <a href="https://incentive.nebulas.io/cn/signup.html?invite=YOr2Y" target="_blank">提交DAPP获得 100NAS 币</a>
                 </span>
@@ -538,7 +554,7 @@
                     </el-form-item>
                     <el-form-item label="栏目" v-show="action!='addContent'">
                         <el-select v-model="topic.category" filterable placeholder="请选择">
-                            <el-option v-for="item in category" :key="item.slug" :label="item.name" :value="item.slug">
+                            <el-option v-for="item in app.hotCategory" :key="item.slug" :label="item.name" :value="item.slug">
                             </el-option>
                         </el-select>
                     </el-form-item>
@@ -611,7 +627,7 @@
                     <li>
                         <router-link :class="{'active':!slug}" :to="{path:'/'}">全部</router-link>
                     </li>
-                    <li v-for="category in app.categoryList.category.slice(0,10)" :key="category.slug">
+                    <li v-for="category in app.hotCategory.slice(0,10)" :key="category.slug">
                         <router-link :class="{'active':slug==category.slug}" :to="{path:'/c/'+category.slug}">{{category.name}}</router-link>
                     </li>
                 </ul>
@@ -653,7 +669,7 @@
     <script src="dist/nebulas.js"></script>
     <script src="dist/nebPay.js"></script>
     <script src="static/js/markdown.min.js"></script>
-    <script src="static/js/index.js?_=201805171034"></script>
+    <script src="static/js/index.js?_=201805172349"></script>
 
 </body>
 

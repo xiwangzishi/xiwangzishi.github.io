@@ -1265,7 +1265,7 @@ var Main = {
             hotCategory.sort(function (n, p) {
                 return p.topicNums > n.topicNums
             })
-            this.hotCategory = hotCategory.slice(0, 7)
+            this.hotCategory = hotCategory
         },
         fetchUserInfo: function () {
             var _this = this;
