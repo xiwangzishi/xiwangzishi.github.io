@@ -98,7 +98,10 @@
         </nav>
         <div class="container" id="container">
             <div style="text-align:center;padding-left:20px;">
-                <el-alert style="font-size:14px;text-align:left;margin-bottom:5px;" type="success">链社区正在举行第二期活动：分享原创文章，得 0.02 NAS，欢迎大家分享自己的知识。<a href="https://bbs.forfunapp.com/#/topic/82058227be1ec21bafb4a069a64aa341a84fe01b4ac4611c1893132a446250f7">查看活动详情</a>
+                <el-alert style="font-size:14px;text-align:left;margin-bottom:5px;" type="success">
+                    链社区正在举行第二期活动：分享原创文章，得 0.02 NAS，欢迎大家分享自己的知识。(此活动继续有效)&nbsp;&nbsp;<a href="https://bbs.forfunapp.com/#/topic/82058227be1ec21bafb4a069a64aa341a84fe01b4ac4611c1893132a446250f7">查看活动详情</a><br/>
+                    
+                    链社区正在举行第三期活动：介绍你已提交的DAPP，得 0.0666 NAS。<a href="https://bbs.forfunapp.com/#/topic/01115fb1990af34c85ff6771a96d9f47cd462a4e77771a8932f36bbf3a45029d">查看活动详情</a>
                 </el-alert>
                 <el-alert type="error" class="noExtension" id="noExtension"  v-if="noExtension">
                     注意: 请安装
@@ -354,12 +357,12 @@
                         <el-col :span="2" :xs="24" class="avatar">
                             <el-popover placement="right-start" trigger="hover">
                                 <div class="user-popover">
-                                    <img class="avatar" :src="topic.user.avatar|buildAvatar">
+                                    <img class="avatar" referrerpolicy="no-referrer" :src="topic.user.avatar|buildAvatar">
                                     <p class="name">{{topic.user.nickName}}</p>
                                     <p class="topic-nums" v-if="topic.user.topicNums">主题数 {{topic.user.topicNums}}</p>
                                     <el-button class="fllow" @click="$eventHub.fllowUser(topic.user)" size="mini" round>立即关注</el-button>
                                 </div>
-                                <img slot="reference" :src="topic.user.avatar|buildAvatar">
+                                <img referrerpolicy="no-referrer" slot="reference" :src="topic.user.avatar|buildAvatar">
                             </el-popover>
                         </el-col>
                         <el-col :span="22" :xs="24" class="topic">
@@ -422,17 +425,17 @@
                         <el-col :span="2" :xs="4" class="avatar">
                             <el-popover placement="right-start" trigger="hover">
                                 <div class="user-popover">
-                                    <img class="avatar" :src="reply.user.avatar|buildAvatar">
+                                    <img  referrerpolicy="no-referrer" class="avatar" :src="reply.user.avatar|buildAvatar">
                                     <p class="name">{{reply.user.nickName}}</p>
                                     <p class="reply-nums" v-if="reply.user.topicNums">主题数 {{reply.user.topicNums}}</p>
                                     <el-button class="fllow" @click="$eventHub.fllowUser(reply.user)" size="mini" round>立即关注</el-button>
                                 </div>
-                                <img slot="reference" :src="reply.user && reply.user.avatar|buildAvatar">
+                                <img  referrerpolicy="no-referrer" slot="reference" :src="reply.user && reply.user.avatar|buildAvatar">
                             </el-popover>
                         </el-col>
                         <el-col :span="22" :xs="18" class="info">
                             <div class="user">
-                                <a class="nickname" href="">{{reply.user && reply.user.nickName||reply.author}}</a>
+                                <router-link class="nickname" :to="{name:'myTopic',params:{hash:reply.author}}">{{reply.user && reply.user.nickName||reply.author}}</router-link>
                                 <span class="created">{{reply.created|dateFormat}}</span>
                                 <span class="no">{{reply.replyIndex}}</span>
                             </div>
@@ -641,7 +644,7 @@
                 <div class="item-list">
                     <el-row class="topic-item" v-for="item in topicList.topic" :key="item.hash">
                         <el-col :span="2" :xs="4" class="avatar">
-                            <img :src="item.user.avatar|buildAvatar" alt="">
+                            <img  referrerpolicy="no-referrer" :src="item.user.avatar|buildAvatar" alt="">
                         </el-col>
                         <el-col :span="22" :xs="18" class="topic">
                             <p class="title">
