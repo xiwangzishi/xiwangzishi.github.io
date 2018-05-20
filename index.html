@@ -7,7 +7,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>链社区-基于星云链的微论坛</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.3.7/lib/theme-chalk/index.css">
-    <link rel="stylesheet" href="static/css/style.css?_=1.0.3">
+    <link rel="stylesheet" href="static/css/style.css?_=1.0.4">
     <link rel="stylesheet" href="editor.md/css/editormd.min.css" />
     <link rel="stylesheet" href="editor.md/css/editormd.preview.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/vue@2.2.6/dist/vue.min.js"></script>
@@ -330,20 +330,12 @@
     <script type="text/x-template" id="my-reply-tpl">
         <div class="box" id="my-reply" v-loading="replyListLoading">
             <div class="header header-black">我的回复</div>
-            <table class="table">
-                <tr>
-                    <th style="width: 30%;">主题</th>
-                    <th style="width: 55%;">回复内容</th>
-                    <th style="width: 15%;">回复时间</th>
-                </tr>
-                <tr v-for="item in replyList.reply" :key="item.hash">
-                    <td class="title">
-                        <router-link :to="{name:'topic',params:{hash:item.topic.hash}}">{{item.topic.title}}</router-link>
-                    </td>
-                    <td class="content">{{item.content}}</td>
-                    <td class="date">{{item.created|dateFormat}}</td>
-                </tr>
-            </table>
+            
+            <el-row class="reply-row" v-for="item in replyList.reply" :key="item.hash">
+                <div class="title"><router-link class="blue-color" :to="{name:'topic',params:{hash:item.topic.hash}}">{{item.topic.title}}</router-link></div>
+                <div class="content" :html="editormdFormat(item.hash,item.content)" :id="item.hash"></div>
+                <div class="created">回答于：{{item.created|dateFormat}}</div>
+            </el-row>
             <div style="text-align:center;margin:20px auto;">
                 <el-button round size="medium" :disabled="noMoreData" :loading="replyListMoreLoading" @click="loadingMore">{{loadingMoreText}}</el-button>
             </div>
@@ -688,6 +680,6 @@
     <script src="editor.md/lib/marked.min.js"></script>
     <script src="editor.md/js/editormd.amd.min.js"></script>
     <script src="editor.md/lib/prettify.min.js"></script>
-    <script src="static/js/index.js?_=201805201249"></script>
+    <script src="static/js/index.js?_=201805202035"></script>
 </body>
 </html>

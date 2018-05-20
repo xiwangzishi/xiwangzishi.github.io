@@ -689,6 +689,22 @@ a {
 .editormd-help-dialog{
     /* width: 600px!important; */
 }
+.reply-row{
+    border-bottom: 1px solid #eee;
+    color: #333;
+    font-size: 14px;
+    padding: 15px 15px;
+}
+.reply-row .title{
+    margin-bottom: 6px;
+}
+.reply-row .content{
+    margin-bottom: 15px!important;
+}
+.reply-row .created{
+    font-size: 13px;
+    color: #ccc;
+}
 @media(max-width:768px) {
     .container {
         padding: 0px 8px;
