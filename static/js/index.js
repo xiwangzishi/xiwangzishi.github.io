@@ -322,9 +322,27 @@ var HomeComponent = {
         }
     }
 }
-
+function newEditor(id, options) {
+    if (!options) {
+        options = {}
+    }
+    return editormd(id, {
+        width: "100%",
+        height: options.height || 640,
+        syncScrolling: "single",
+        path: "editor.md/lib/",
+        toolbarIcons: function () {
+            // Or return editormd.toolbarModes[name]; // full, simple, mini
+            // Using "||" set icons align right.
+            return ["bold", "del", "italic", "quote", "|", "h1", "h2", "h3", "h4", "h5", "|", "list-ul", "list-ol", "hr", "|", "link", "image", "code", "code-block", "table", "html-entities", "|", "watch", "preview", "fullscreen", "help", "info"]
+        },
+    });
+}
 var AddTopicComponent = {
     template: '#add-topic-tpl',
+    mounted: function () {
+        this.editor = newEditor('editormd')
+    },
     created: function () {
 
     },
@@ -338,6 +356,7 @@ var AddTopicComponent = {
             var err = "",
                 _this = this,
                 isAddContent = this.action == "addContent";
+            this.topic.content = this.editor.getMarkdown()
             if (!app.user.nickName) {
                 return this.$message.error("请先完善用户信息");
             }
@@ -386,6 +405,7 @@ var AddTopicComponent = {
     },
     data: function () {
         return {
+            editor: null,
             action: this.$route.query.action,
             hash: this.$route.query.hash,
             topic: {
@@ -629,6 +649,11 @@ var MyReplyComponent = {
 
 var TopicComponent = {
     template: '#topic-tpl',
+    mounted:function () {
+        this.editor = newEditor('reply-editor', {
+            height:200
+        })
+    },
     methods: {
         fetchTopic: function () {
             var _this = this
@@ -735,6 +760,8 @@ var TopicComponent = {
                 return this.$message.error("请先完善用户信息");
             }
 
+            this.reply.content = this.editor.getMarkdown()
+
             if (this.reply.content.length < 5) {
                 return this.$message.error("回复内容不得少于5个字符");
             }
@@ -792,7 +819,11 @@ var TopicComponent = {
                 _this.replyList.total = result.total
                 if (result.reply.length) {
                     _this.loadingMoreText = "加载更多"
-                    _this.replyList.reply = _this.replyList.reply.concat(result.reply)
+                    // _this.replyList.reply = _this.replyList.reply.concat(result.reply)
+                    for (var i = 0; i < result.reply.length; i++){
+                        var item = result.reply[i]
+                        _this.replyList.reply.push(item)
+                    }
                 } else {
                     _this.loadingMoreText = "没有更多数据"
                 }
@@ -815,6 +846,7 @@ var TopicComponent = {
             hash: hash,
             loading: true,
             replyListLoading: false,
+            editor:null,
             loadingMoreText: "加载更多",
             replyOffset: 0,
             replyLimit: 10,
@@ -1361,18 +1393,50 @@ Vue.filter("buildAvatar", function (value) {
 })
 
 // md 转换为 HTML
-function contentFormat(value) {
-    return markdown.toHTML(value)
-}
+// function contentFormat(value) {
+//     return markdown.toHTML(value)
+// }
 
-Vue.filter("contentFormat", contentFormat)
+// Vue.filter("contentFormat", contentFormat)
 
 Vue.filter("fromBasicNas", function (value) {
     return Unit.fromBasic(Utils.toBigNumber(value, "nas")).toNumber()
 })
 
+// var 
 
+function editormdFormat(id, markdown) {
+    // console.log('editormdFormat:', id)
+    
+    setTimeout(function () {
+        // console.log(document.getElementById(id))
+        if (document.getElementById(id).innerHTML != "") {
+            // console.log(111111)
+            return
+        }
+        editormd.markdownToHTML(id, {
+            markdown        : markdown ,//+ "\r\n" + $("#append-test").text(),
+            //htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
+            htmlDecode      : "style,script,iframe",  // you can filter tags decode
+            //toc             : false,
+            atLink: false,
+            // autoLoadKaTeX:false,
+            // tocm            : true,    // Using [TOCM]
+            //tocContainer    : "#custom-toc-container", // 自定义 ToC 容器层
+            gfm             : false,
+            //tocDropdown     : true,
+            // markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
+            // emoji           : true,
+            taskList        : true,
+            // tex             : true,  // 默认不解析
+            // flowChart       : true,  // 默认不解析
+            // sequenceDiagram : true,  // 默认不解析
+        });
+    }, 0)
+    // return "xxxx"
+}
 
+// Vue.$message
 
 nasApi.getNebState().then(function (state) {
     defaultData.nebState = state

@@ -8,9 +8,12 @@
     <title>链社区-基于星云链的微论坛</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/element-ui@2.3.7/lib/theme-chalk/index.css">
     <link rel="stylesheet" href="static/css/style.css?_=1.0.1">
+    <link rel="stylesheet" href="editor.md/css/editormd.min.css" />
+    <link rel="stylesheet" href="editor.md/css/editormd.preview.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/vue@2.2.6/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vue-router@3.0.1/dist/vue-router.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/element-ui@2.3.7/lib/index.js"></script>
+
 </head>
 
 <body>
@@ -63,6 +66,7 @@
                         <a target="_blank" href="https://nebulasio.github.io/neb.js/index.html">Neb.js 文档</a>
                     </el-menu-item>
                     <el-menu-item><a target="_blank" href="https://github.com/nebulasio/wiki">官方Wiki</a></el-menu-item>
+                    <el-menu-item><a target="_blank" href="https://github.com/nebulasio/nebPay/blob/master/doc/NebPay介绍.md">NebPay文档</a></el-menu-item>
                     <el-menu-item><a target="_blank" href="https://blog.nebulas.io/2018/05/09/how-to-use-nebpay-in-your-dapp/">NebPay教程</a></el-menu-item>
                     <el-menu-item><a target="_blank" href="https://blog.nebulas.io/2018/05/04/how-to-build-a-dapp-on-nebulas-part-1/">手把手教你星云DApp开发</a>
                     </el-menu-item>
@@ -101,7 +105,7 @@
                 <el-alert style="font-size:14px;text-align:left;margin-bottom:5px;" type="success">
                     链社区正在举行第二期活动：分享原创文章，得 0.02 NAS，欢迎大家分享自己的知识。(此活动继续有效)&nbsp;&nbsp;<a href="https://bbs.forfunapp.com/#/topic/82058227be1ec21bafb4a069a64aa341a84fe01b4ac4611c1893132a446250f7">查看活动详情</a><br/>
                     
-                    链社区正在举行第三期活动：介绍你已提交的DAPP，得 0.0666 NAS。<a href="https://bbs.forfunapp.com/#/topic/01115fb1990af34c85ff6771a96d9f47cd462a4e77771a8932f36bbf3a45029d">查看活动详情</a>
+                    链社区正在举行第三期活动：介绍你已提交的DAPP，得 0.0666 NAS。(此活动继续有效)&nbsp;&nbsp;<a href="https://bbs.forfunapp.com/#/topic/01115fb1990af34c85ff6771a96d9f47cd462a4e77771a8932f36bbf3a45029d">查看活动详情</a>
                 </el-alert>
                 <el-alert type="error" class="noExtension" id="noExtension"  v-if="noExtension">
                     注意: 请安装
@@ -384,8 +388,8 @@
                         </el-col>
                     </el-row>
                     <div class="topic-content">
-                        <div v-html="contentFormat(topic.content)" class="detail">
-                        </div>
+                        <!--<div v-once v-html="contentFormat2('topic.content')" class="detail"></div>-->
+                        <div v-once id="topic-markdown" :html="editormdFormat('topic-markdown',topic.content)"></div>
                         <div class="text-center donate" v-if="topic.openDonate">
                             <el-button type="warning" circle @click="donateTopic">赏</el-button>
                             <p class="donate-info" v-if="topic.donateNums">已有
@@ -400,8 +404,7 @@
                 <div class="footer" v-if="topic.additionalNums">
                     <div class="additional" v-for="add,index in topic.additional" :key="add.created">
                         <p class="info">第 {{index+1}} 条附言 · {{add.created|dateFormat}} </p>
-                        <div v-html="contentFormat(add.content)">
-                        </div>
+                        <div id="87b01e609b004778e5e800d3a1f4657ba41d89c020485e6fd5f53489cbca48eb" :html="editormdFormat(add.hash,add.content)"></div>
                     </div>
                 </div>
                 <el-row class="footer action">
@@ -421,7 +424,7 @@
                     <span>({{replyList.total}})</span>
                 </div>
                 <div class="content">
-                    <el-row class="reply-item" v-for="reply in replyList.reply">
+                    <el-row class="reply-item" v-for="reply in replyList.reply" :key="reply.hash">
                         <el-col :span="2" :xs="4" class="avatar">
                             <el-popover placement="right-start" trigger="hover">
                                 <div class="user-popover">
@@ -439,7 +442,8 @@
                                 <span class="created">{{reply.created|dateFormat}}</span>
                                 <span class="no">{{reply.replyIndex}}</span>
                             </div>
-                            <div class="reply-content" v-html="contentFormat(reply.content)"></div>
+                            <!--:html="editormdFormat(reply.hash,reply.content)"-->
+                            <div class="reply-content" :html="editormdFormat(reply.hash,reply.content)"   :id="reply.hash" ></div>
                             <span class="action donate" @click="donateReply(reply)">赏</span>
                         </el-col>
                     </el-row>
@@ -453,7 +457,8 @@
                 <div class="content">
                     <el-form status-icon>
                         <el-form-item>
-                            <el-input type="textarea" v-model="reply.content" :autosize="{ minRows: 3}"></el-input>
+                            <!--<el-input type="textarea" v-model="reply.content" :autosize="{ minRows: 3}"></el-input>-->
+                            <div id="reply-editor"></div>
                         </el-form-item>
                         <el-form-item>
                             <el-button type="primary" @click="submitReply">立即回复</el-button>
@@ -564,9 +569,13 @@
                             </el-option>
                         </el-select>
                     </el-form-item>
-                    <el-form-item label="内容">
+                    <!--<el-form-item label="内容">
                         <el-input type="textarea" v-model="topic.content" :autosize="{ minRows: 9}"></el-input>
-                    </el-form-item>
+                    </el-form-item>-->
+                    <label class="el-form-item__label">内容</label>
+                    <div id="editormd">
+                        <textarea style="display:none;" v-model="topic.content"></textarea>
+                    </div>
                     <el-switch v-show="action!='addContent'" style="margin-bottom:15px;" v-model="topic.openDonate" active-text="开启打赏"></el-switch>
                     <!--<el-form-item>
                         <div v-html="contentFormat(topic.content)"></div>
@@ -674,9 +683,11 @@
 
     <script src="dist/nebulas.js"></script>
     <script src="dist/nebPay.js"></script>
-    <script src="static/js/markdown.min.js"></script>
+    <!--<script src="static/js/markdown.min.js"></script>-->
+    <script src="editor.md/js/jquery.min.js"></script>
+    <script src="editor.md/lib/marked.min.js"></script>
+    <script src="editor.md/lib/prettify.min.js"></script>
+    <script src="editor.md/js/editormd.amd.min.js"></script>
     <script src="static/js/index.js?_=201805172349"></script>
-
 </body>
-
 </html>

@@ -496,7 +496,8 @@ a {
 
 .topic-detail .footer {
     padding: 10px 20px;
-    background-color: rgba(0, 0, 0, 0.02);
+    /* background-color: rgba(0, 0, 0, 0.02); */
+    background-color: #FFF;
 }
 
 .topic-detail .footer.action {
@@ -588,31 +589,8 @@ a {
     margin-top: 8px;
 }
 
-.topic-content pre>code,
-.reply-content pre>code {
-    display: block;
-}
-
-.topic-content code,
-.reply-content code {
-    border-left: 4px #eee solid;
-    padding:2px 10px;
-    background-color: rgba(238, 238, 238, 0.75);
-    overflow-y: scroll;
-}
-
 .reply-item .reply-content {
-    font-size: 14px;
-    line-height: 1.6;
-    color: #000;
-    word-break: break-all;
-    word-wrap: break-word;
-    padding: 10px 0px;
-}
-
-.reply-item .reply-content p {
-    margin: 0px;
-    margin-bottom: 10px;
+    margin-top: 5px!important;
 }
 
 .add-reply .header {
@@ -701,7 +679,16 @@ a {
 .donate-info .hl {
     color: rgba(64, 158, 255, 0.8);
 }
-
+#editormd{
+    z-index: 999;
+}
+.editormd-html-preview{
+    margin: 0px!important;
+    padding: 0px!important;
+}
+.editormd-help-dialog{
+    /* width: 600px!important; */
+}
 @media(max-width:768px) {
     .container {
         padding: 0px 8px;
