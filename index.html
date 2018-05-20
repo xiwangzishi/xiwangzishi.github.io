@@ -404,7 +404,7 @@
                 <div class="footer" v-if="topic.additionalNums">
                     <div class="additional" v-for="add,index in topic.additional" :key="add.created">
                         <p class="info">第 {{index+1}} 条附言 · {{add.created|dateFormat}} </p>
-                        <div id="87b01e609b004778e5e800d3a1f4657ba41d89c020485e6fd5f53489cbca48eb" :html="editormdFormat(add.hash,add.content)"></div>
+                        <div :id="add.hash" :html="editormdFormat(add.hash,add.content)"></div>
                     </div>
                 </div>
                 <el-row class="footer action">

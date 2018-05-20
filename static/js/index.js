@@ -1406,7 +1406,7 @@ Vue.filter("fromBasicNas", function (value) {
 // var 
 
 function editormdFormat(id, markdown) {
-    // console.log(id,markdown)
+    console.log(id,markdown)
     setTimeout(function () {
         // console.log(document.getElementById(id))
         var ele = document.getElementById(id)
