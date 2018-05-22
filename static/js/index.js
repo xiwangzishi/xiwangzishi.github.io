@@ -1044,7 +1044,7 @@ Vue.prototype.$eventHub = new Vue({
                             _this.$notify({
                                 title: '错误',
                                 message: '用户取消了交易！',
-                                duration: 0,
+                                duration: 3000,
                                 type: 'error'
                             });
                             return
