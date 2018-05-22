@@ -1038,7 +1038,18 @@ Vue.prototype.$eventHub = new Vue({
                 options = {
                     callback: chainInfo.payhost,
                     listener: function (value) {
-                        mylog("listener:", value, serialNumber)
+                        // mylog("listener:", value, serialNumber)
+                        // console.log(value)
+                        if (typeof value == 'string') {
+                            _this.$notify({
+                                title: '错误',
+                                message: '用户取消了交易！',
+                                duration: 0,
+                                type: 'error'
+                            });
+                            return
+                        }
+                        
                         config.serialNumber = serialNumber
                         config.txhash = value.txhash
 
