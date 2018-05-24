@@ -322,6 +322,7 @@ var HomeComponent = {
         }
     }
 }
+
 function newEditor(id, options) {
     if (!options) {
         options = {}
@@ -649,9 +650,9 @@ var MyReplyComponent = {
 
 var TopicComponent = {
     template: '#topic-tpl',
-    mounted:function () {
+    mounted: function () {
         this.editor = newEditor('reply-editor', {
-            height:200
+            height: 200
         })
     },
     methods: {
@@ -820,7 +821,7 @@ var TopicComponent = {
                 if (result.reply.length) {
                     _this.loadingMoreText = "加载更多"
                     // _this.replyList.reply = _this.replyList.reply.concat(result.reply)
-                    for (var i = 0; i < result.reply.length; i++){
+                    for (var i = 0; i < result.reply.length; i++) {
                         var item = result.reply[i]
                         _this.replyList.reply.push(item)
                     }
@@ -846,7 +847,7 @@ var TopicComponent = {
             hash: hash,
             loading: true,
             replyListLoading: false,
-            editor:null,
+            editor: null,
             loadingMoreText: "加载更多",
             replyOffset: 0,
             replyLimit: 10,
@@ -1006,6 +1007,59 @@ var router = new VueRouter({
     routes: routes
 })
 
+function getErrMsg(err) {
+    var msg = ""
+    if (err == 'Error: 403') {
+        msg = "权限禁止"
+    } else if (err == 'Error: 10001') {
+        msg = "栏目未找到"
+    } else if (err == 'Error: 10005') {
+        msg = "用户未注册"
+    } else if (err == 'Error: 10003') {
+        msg = "offset 参数大于数据长度"
+    } else if (err == 'Error: 10004') {
+        msg = "已关注此用户"
+    } else if (err == 'Error: 10006') {
+        msg = "当前注册用户需要支付一定的 NAS，你支付的NAS错误！"
+    } else if (err == 'Error: 10008') {
+        msg = "帖子标题长度必须大于5个字符"
+    } else if (err == 'Error: 10009') {
+        msg = "发帖时必须选择栏目"
+    } else if (err == 'Error: 10010') {
+        msg = "栏目已存在"
+    } else if (err == 'Error: 10011') {
+        msg = "回复内容太短"
+    } else if (err == 'Error: 10012') {
+        msg = "打赏金额错误"
+    } else if (err == 'Error: 10013') {
+        msg = "已经收藏该栏目"
+    } else if (err == 'Error: 10014') {
+        msg = "已经收藏该主题"
+    } else if (err == 'Error: 10015') {
+        msg = "未找到此主题"
+    } else if (err == 'Error: 10016') {
+        msg = "内容不能为空"
+    } else if (err == 'Error: 10017') {
+        msg = "不能自己关注自己"
+    } else if (err == 'Error: 10018') {
+        msg = "未关注此用户"
+    } else if (err == 'Error: 10019') {
+        msg = "该昵称已存在"
+    } else if (err == 'Error: 10020') {
+        msg = "昵称必须大于等于3个字符"
+    } else if (err == 'Error: 10021') {
+        msg = "此栏目只有对应的管理员可以发帖"
+    } else if (err == 'Error: 10022') {
+        msg = "用户在黑名单"
+    } else if (err == 'Error: 10023') {
+        msg = "用户地址余额小于最小NAS要求（防止恶意用户发帖）"
+    } else if (err == 'Error: 10024') {
+        msg = "充值金额错误"
+    }
+    return msg
+}
+
+
 Vue.prototype.$eventHub = new Vue({
     created: function () {
         this.$on("checkTransaction", this.checkTransaction)
@@ -1049,7 +1103,7 @@ Vue.prototype.$eventHub = new Vue({
                             });
                             return
                         }
-                        
+
                         config.serialNumber = serialNumber
                         config.txhash = value.txhash
 
@@ -1124,7 +1178,23 @@ Vue.prototype.$eventHub = new Vue({
                         if (config.successFunc) {
                             setTimeout(function () {
                                 config.successFunc(receipt)
-                            }, 500)
+                            }, 300)
+
+                        }
+                    } else if (receipt.status === 0) { //错误
+                        // "Error: 10008"
+                        context.$message.error(getErrMsg(receipt.execute_result))
+                        clearInterval(timerId)
+                        config.transStateNotify.close()
+
+                        if (timeOutId) {
+                            clearTimeout(timeOutId)
+                        }
+
+                        if (config.failFunc) {
+                            setTimeout(function () {
+                                config.failFunc(receipt)
+                            }, 300)
 
                         }
                     }
@@ -1426,7 +1496,7 @@ function editormdFormat(id, markdown) {
             return
         }
         editormd.markdownToHTML(id, {
-            markdown        : markdown ,//+ "\r\n" + $("#append-test").text(),
+            markdown: markdown, //+ "\r\n" + $("#append-test").text(),
             //htmlDecode      : true,       // 开启 HTML 标签解析，为了安全性，默认不开启
             // htmlDecode      : "style,script,iframe",  // you can filter tags decode
             //toc             : false,
@@ -1438,7 +1508,7 @@ function editormdFormat(id, markdown) {
             //tocDropdown     : true,
             // markdownSourceCode : true, // 是否保留 Markdown 源码，即是否删除保存源码的 Textarea 标签
             // emoji           : true,
-            taskList        : true,
+            taskList: true,
             // tex             : true,  // 默认不解析
             // flowChart       : true,  // 默认不解析
             // sequenceDiagram : true,  // 默认不解析
