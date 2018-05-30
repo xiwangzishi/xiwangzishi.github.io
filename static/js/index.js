@@ -723,6 +723,8 @@ var TopicComponent = {
                     },
                 }
                 _this.$eventHub.$emit("nebPayCall", data)
+            }).catch(function () {
+                
             })
 
         },
