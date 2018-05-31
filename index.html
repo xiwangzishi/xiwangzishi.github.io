@@ -548,7 +548,8 @@
 
             <div class="header" style="color:#333;font-size:15px;font-weight:bold;">{{action=='addContent'?'补充帖子内容':'添加新主题'}}</div>
             <div class="content">
-                <el-alert style="font-size:14px;" type="warning">请输入有意义的标题，如果标题能够表达完整内容，则正文可以为空。正文内容支持 <a href="http://wowubuntu.com/markdown/" target="_blank">Markdown</a></el-alert>
+                <el-alert style="font-size:14px;" type="warning">请输入有意义的标题，如果标题能够表达完整内容，则正文可以为空。正文内容支持 <a href="http://www.markdown.cn/" target="_blank">Markdown</a></el-alert>
+                <el-alert style="font-size:14px;margin-top:5px;" type="error">为了论坛健康发展，请勿发布无意义内容。禁止发布一切推广信息（分享开发的DAPP除外）</el-alert>
                 <el-form status-icon label-position="top">
                     <el-form-item label="标题">
                         <el-input v-model="topic.title" :disabled="action=='addContent'"></el-input>
@@ -641,7 +642,7 @@
                 </div>
                 <div class="header header-black" v-if="page=='favTopic'">我收藏的主题</div>
                 <div class="item-list">
-                    <el-row class="topic-item" v-for="item in topicList.topic" :key="item.hash">
+                    <el-row class="topic-item" v-if="checkHiddenTopic(item.hash)" v-for="item in topicList.topic" :key="item.hash">
                         <el-col :span="2" :xs="4" class="avatar">
                             <img  referrerpolicy="no-referrer" :src="item.user.avatar|buildAvatar" alt="">
                         </el-col>
