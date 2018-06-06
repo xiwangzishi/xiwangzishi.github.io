@@ -81,7 +81,7 @@
                 </el-submenu>
             </el-menu>
             <el-menu :default-active="activeIndex" id="right-menu" class="el-menu right" mode="horizontal">
-                <el-menu-item index="register">
+                <el-menu-item index="register" v-if="!address">
                     <router-link :to="{path:'/user/setting'}">
                     注册
                     </router-link>

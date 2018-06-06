@@ -2,8 +2,8 @@ var nebulas = require("nebulas"),
     NebPay = require("nebpay"),
     HttpRequest = nebulas.HttpRequest,
     Neb = nebulas.Neb,
-    Account = nebulas.Account,
-    Transaction = nebulas.Transaction,
+    // Account = nebulas.Account,
+    // Transaction = nebulas.Transaction,
     Unit = nebulas.Unit,
     Utils = nebulas.Utils;
 
@@ -20,6 +20,13 @@ var chainnetConfig = {
         contractAddress: "n1iw6b9KtKsGaeKPi7GEyJDRLibpw4jf8f9",
         txhash: "6c9ebc2b9d1e5c6b035b05ba6448911d17599b2026c9d0bd504c372b5f8fe977",
         host: "https://testnet.nebulas.io",
+        payhost: "https://pay.nebulas.io/api/pay"
+    },
+    localnet: {
+        name: "本地网",
+        contractAddress: "n1iw6b9KtKsGaeKPi7GEyJDRLibpw4jf8f9",
+        txhash: "6c9ebc2b9d1e5c6b035b05ba6448911d17599b2026c9d0bd504c372b5f8fe977",
+        host: "http://localhost:8685",
         payhost: "https://pay.nebulas.io/api/pay"
     }
 }
@@ -329,6 +336,7 @@ function newEditor(id, options) {
     }
     return editormd(id, {
         width: "100%",
+        autoFocus : false,
         height: options.height || 640,
         syncScrolling: "single",
         path: "editor.md/lib/",
